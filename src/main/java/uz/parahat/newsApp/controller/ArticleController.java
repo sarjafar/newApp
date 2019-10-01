@@ -1,57 +1,60 @@
 package uz.parahat.newsApp.controller;
 
-import io.swagger.annotations.Api;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.parahat.newsApp.domain.Article;
 import uz.parahat.newsApp.repository.ArticleRepository;
-import uz.parahat.newsApp.repository.UserRepository;
+import uz.parahat.newsApp.service.ArticleService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-//@RequestMapping("news")
-@Api(tags = "Limits reference")
+@RequestMapping("article")
 public class ArticleController {
-	private UserRepository userRepository;
-	private ArticleRepository articleRepository;
+	@Autowired
+	private ArticleService articleService;
 
 	@Autowired
 	public ArticleController(ArticleRepository articleRepository) {
-		this.articleRepository = articleRepository;
 	}
 
-	@GetMapping("/news")
-	public List<Article> list() {
-		return (List<Article>) articleRepository.findAll();
+	@GetMapping
+	public ResponseEntity<List<Article>> list(@RequestHeader("token") String token) {
+		return articleService.listAll(token);
 	}
 
-	@GetMapping("/news/{id}")
-	public Article getOne(@PathVariable("id") Article article) {
-		return article;
+	@GetMapping("{id}")
+	public ResponseEntity<Article> getOne(
+			@PathVariable("id") Long articleId,
+			@RequestHeader("token") String token
+	) {
+		return articleService.getOne(articleId, token);
 	}
 
 	@PostMapping
-	public Article create(@RequestBody Article article) {
-		article.setCreatedDate(LocalDateTime.now());
-		return articleRepository.save(article);
-	}
-
-	@PutMapping("/news/{id}")
-	public Article update(
-			@PathVariable("id") Article articleFromDb,
-			@RequestBody Article article
+	public ResponseEntity<Article> create(
+			@RequestBody Article article,
+			@RequestHeader("token") String token
 	) {
-		BeanUtils.copyProperties(article, articleFromDb, "id");
-
-		return articleRepository.save(articleFromDb);
+		return articleService.create(article, token);
 	}
 
-	@DeleteMapping("/news/{id}")
-	public void delete(@PathVariable("id") Article article) {
-		articleRepository.delete(article);
+	@PutMapping("{id}")
+	public ResponseEntity update(
+			@PathVariable("id") Long articleId,
+			@RequestBody Article article,
+			@RequestHeader("token") String token
+	) {
+		return articleService.update(articleId, article, token);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity delete(
+			@PathVariable("id") Long articleId,
+			@RequestHeader("token") String token
+	) {
+		return articleService.delete(articleId, token);
 	}
 
 }

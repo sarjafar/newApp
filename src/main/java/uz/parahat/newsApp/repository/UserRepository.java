@@ -1,11 +1,13 @@
 package uz.parahat.newsApp.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 import uz.parahat.newsApp.domain.User;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+import java.util.Optional;
 
-	User findByUsername(String username);
+public interface UserRepository extends CrudRepository<User, Long> {
 
-	User findByActivationCode(String code);
+	Optional<User> findByPhone(String phone);
+
+	Optional<User> findByToken(String token);
 }
